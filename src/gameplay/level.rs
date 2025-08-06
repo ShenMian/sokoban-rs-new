@@ -1,11 +1,16 @@
 //! Spawn the main level.
 
 use bevy::prelude::*;
+use nalgebra::Vector2;
+use soukoban::Tiles;
 
 use crate::{
     asset_tracking::LoadResource,
     audio::music,
-    gameplay::player::{PlayerAssets, player},
+    gameplay::{
+        player::{PlayerAssets, player},
+        tilemap::{TilemapAssets, tile},
+    },
     screens::Screen,
 };
 
@@ -30,10 +35,14 @@ impl FromWorld for LevelAssets {
     }
 }
 
+#[derive(Component, Deref, DerefMut)]
+pub struct GridPosition(Vector2<i32>);
+
 /// A system that spawns the main level.
 pub fn spawn_level(
     mut commands: Commands,
     level_assets: Res<LevelAssets>,
+    tilemap_assets: Res<TilemapAssets>,
     player_assets: Res<PlayerAssets>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
@@ -43,6 +52,7 @@ pub fn spawn_level(
         Visibility::default(),
         StateScoped(Screen::Gameplay),
         children![
+            tile(Tiles::Floor, &tilemap_assets),
             player(400.0, &player_assets, &mut texture_atlas_layouts),
             (
                 Name::new("Gameplay Music"),
