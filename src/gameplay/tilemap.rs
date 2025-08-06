@@ -14,31 +14,28 @@ pub(super) fn plugin(app: &mut App) {
 #[reflect(Resource)]
 pub struct TilemapAssets {
     #[dependency]
-    floor: Handle<Image>,
-    #[dependency]
-    wall: Handle<Image>,
-    #[dependency]
-    r#box: Handle<Image>,
-    #[dependency]
-    goal: Handle<Image>,
-    #[dependency]
-    player: Handle<Image>,
+    atlas: Handle<Image>,
+    atlas_layout: TextureAtlasLayout,
 }
 
 impl FromWorld for TilemapAssets {
     fn from_world(world: &mut World) -> Self {
-        let settings = |settings: &mut ImageLoaderSettings| {
-            // Use `nearest` image sampling to preserve pixel art style.
-            settings.sampler = ImageSampler::nearest();
-        };
-
         let assets = world.resource::<AssetServer>();
         Self {
-            floor: assets.load_with_settings("images/floor.png", settings),
-            wall: assets.load_with_settings("images/wall.png", settings),
-            r#box: assets.load_with_settings("images/box.png", settings),
-            goal: assets.load_with_settings("images/goal.png", settings),
-            player: assets.load_with_settings("images/player.png", settings),
+            atlas: assets.load_with_settings(
+                "images/tilemap.png",
+                |settings: &mut ImageLoaderSettings| {
+                    // Use `nearest` image sampling to preserve pixel art style.
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
+            atlas_layout: TextureAtlasLayout::from_grid(
+                UVec2::new(128, 128),
+                6,
+                3,
+                Some(UVec2::new(1, 1)),
+                None,
+            ),
         }
     }
 }
