@@ -6,7 +6,8 @@ edition = "2024"
 
 [dependencies]
 bevy = { version = "0.16", features = ["wayland"] }
-soukoban = { path = "../Repos/soukoban" }
+soukoban = { git = "https://github.com/ShenMian/soukoban" }
+nalgebra = "0.34.0"
 rand = "0.9"
 # Compile low-severity logs out of native builds for performance.
 log = { version = "0.4", features = [
@@ -18,7 +19,6 @@ tracing = { version = "0.1", features = [
     "max_level_debug",
     "release_max_level_warn",
 ] }
-nalgebra = "0.34.0"
 
 # Your web builds will start failing if you add a dependency that pulls in `getrandom` v0.3+.
 # To fix this, you should tell `getrandom` to use the `wasm_js` backend on Wasm.

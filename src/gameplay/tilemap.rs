@@ -11,7 +11,7 @@ pub(super) fn plugin(app: &mut App) {
     app.load_resource::<TilemapAssets>();
 }
 
-pub fn tile(tile: Tiles, assets: &TilemapAssets) -> impl Bundle {
+pub fn map_tile(tile: Tiles, assets: &TilemapAssets) -> impl Bundle {
     let index = match tile {
         Tiles::Floor => 0,
         Tiles::Wall => 1,
@@ -20,13 +20,22 @@ pub fn tile(tile: Tiles, assets: &TilemapAssets) -> impl Bundle {
         Tiles::Player => 4,
         _ => panic!(),
     };
+    let z = match tile {
+        Tiles::Floor | Tiles::Wall | Tiles::Goal => 0.,
+        Tiles::Box | Tiles::Player => 1.,
+        _ => panic!(),
+    };
 
-    Sprite::from_atlas_image(
-        assets.atlas.clone(),
-        TextureAtlas {
-            layout: assets.atlas_layout.clone(),
-            index,
-        },
+    (
+        Name::new("Tile"),
+        Sprite::from_atlas_image(
+            assets.atlas.clone(),
+            TextureAtlas {
+                layout: assets.atlas_layout.clone(),
+                index,
+            },
+        ),
+        Transform::from_translation(Vec3::new(0., 0., z)),
     )
 }
 

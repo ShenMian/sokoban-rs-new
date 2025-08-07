@@ -1,16 +1,14 @@
 //! Spawn the main level.
 
+use std::str::FromStr;
+
 use bevy::prelude::*;
 use nalgebra::Vector2;
-use soukoban::Tiles;
 
 use crate::{
     asset_tracking::LoadResource,
     audio::music,
-    gameplay::{
-        player::{PlayerAssets, player},
-        tilemap::{TilemapAssets, tile},
-    },
+    gameplay::tilemap::{TilemapAssets, map_tile},
     screens::Screen,
 };
 
@@ -43,21 +41,30 @@ pub fn spawn_level(
     mut commands: Commands,
     level_assets: Res<LevelAssets>,
     tilemap_assets: Res<TilemapAssets>,
-    player_assets: Res<PlayerAssets>,
-    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
-    commands.spawn((
-        Name::new("Level"),
-        Transform::default(),
-        Visibility::default(),
-        StateScoped(Screen::Gameplay),
-        children![
-            tile(Tiles::Floor, &tilemap_assets),
-            player(400.0, &player_assets, &mut texture_atlas_layouts),
-            (
+    let actions = soukoban::Actions::from_str("R").unwrap();
+    let map = soukoban::Map::from_actions(actions).unwrap();
+
+    commands
+        .spawn((
+            Name::new("Level"),
+            Transform::default(),
+            Visibility::default(),
+            StateScoped(Screen::Gameplay),
+            children![(
                 Name::new("Gameplay Music"),
                 music(level_assets.music.clone())
-            )
-        ],
-    ));
+            )],
+        ))
+        .with_children(|commands| {
+            for x in 0..map.dimensions().x {
+                for y in 0..map.dimensions().y {
+                    let position = Vector2::new(x, y);
+                    let tiles = map.get(position).unwrap();
+                    for tile in tiles.iter() {
+                        commands.spawn((map_tile(tile, &tilemap_assets), GridPosition(position)));
+                    }
+                }
+            }
+        });
 }

@@ -2979,22 +2979,6 @@ dependencies = [
 
 [[package]]
 name = "nalgebra"
-version = "0.33.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26aecdf64b707efd1310e3544d709c5c0ac61c13756046aaaba41be5c4f66a3b"
-dependencies = [
- "approx",
- "matrixmultiply",
- "nalgebra-macros 0.2.2",
- "num-complex",
- "num-rational",
- "num-traits",
- "simba",
- "typenum",
-]
-
-[[package]]
-name = "nalgebra"
 version = "0.34.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9cd59afb6639828b33677758314a4a1a745c15c02bc597095b851c8fd915cf49"
@@ -3017,23 +3001,12 @@ dependencies = [
  "glam 0.29.3",
  "glam 0.30.5",
  "matrixmultiply",
- "nalgebra-macros 0.3.0",
+ "nalgebra-macros",
  "num-complex",
  "num-rational",
  "num-traits",
  "simba",
  "typenum",
-]
-
-[[package]]
-name = "nalgebra-macros"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "254a5372af8fc138e36684761d3c0cdb758a4410e938babcff1c860ce14ddbfc"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]
@@ -4279,7 +4252,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "log",
- "nalgebra 0.34.0",
+ "nalgebra",
  "rand 0.9.2",
  "soukoban",
  "tracing",
@@ -4288,10 +4261,11 @@ dependencies = [
 [[package]]
 name = "soukoban"
 version = "0.1.3"
+source = "git+https://github.com/ShenMian/soukoban#de07ba26e000bceb6c24f489f950043d140fdfb6"
 dependencies = [
  "bitflags 2.9.1",
  "itertools 0.14.0",
- "nalgebra 0.33.2",
+ "nalgebra",
  "thiserror 2.0.12",
 ]
 
