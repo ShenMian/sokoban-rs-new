@@ -1,60 +1,56 @@
 //! Spawn the main level.
 
-use std::str::FromStr;
-
 use bevy::prelude::*;
 use nalgebra::Vector2;
 
+use super::tilemap::GridPosition;
 use crate::{
-    asset_tracking::LoadResource,
-    audio::music,
     gameplay::tilemap::{TilemapAssets, map_tile},
     screens::Screen,
 };
 
 pub(super) fn plugin(app: &mut App) {
-    app.register_type::<LevelAssets>();
-    app.load_resource::<LevelAssets>();
+    setup_database(app.world_mut().commands());
 }
 
-#[derive(Resource, Asset, Clone, Reflect)]
-#[reflect(Resource)]
-pub struct LevelAssets {
-    #[dependency]
-    music: Handle<AudioSource>,
-}
+#[derive(Resource, Deref, DerefMut)]
+pub struct Database(Vec<soukoban::Level>);
 
-impl FromWorld for LevelAssets {
-    fn from_world(world: &mut World) -> Self {
-        let assets = world.resource::<AssetServer>();
-        Self {
-            music: assets.load("audio/music/Fluffing A Duck.ogg"),
-        }
+fn setup_database(mut commands: Commands) {
+    let mut levels = Vec::new();
+    let level_path = std::env::current_dir().unwrap().join("assets/levels");
+    for path in std::fs::read_dir(level_path).unwrap() {
+        let path = path.unwrap().path();
+        levels.extend(
+            soukoban::Level::load_from_str(&std::fs::read_to_string(path).unwrap())
+                .filter_map(Result::ok),
+        );
     }
+    commands.insert_resource(Database(levels));
 }
 
-#[derive(Component, Deref, DerefMut)]
-pub struct GridPosition(Vector2<i32>);
+#[derive(Component)]
+struct Level {
+    inner: soukoban::Level,
+}
 
 /// A system that spawns the main level.
 pub fn spawn_level(
     mut commands: Commands,
-    level_assets: Res<LevelAssets>,
     tilemap_assets: Res<TilemapAssets>,
+    database: Res<Database>,
 ) {
-    let actions = soukoban::Actions::from_str("R").unwrap();
-    let map = soukoban::Map::from_actions(actions).unwrap();
-
+    let level = database.first().unwrap().clone();
+    let map = level.map();
     commands
         .spawn((
             Name::new("Level"),
+            Level {
+                inner: level.clone(),
+            },
             Transform::default(),
             Visibility::default(),
             StateScoped(Screen::Gameplay),
-            children![(
-                Name::new("Gameplay Music"),
-                music(level_assets.music.clone())
-            )],
         ))
         .with_children(|commands| {
             for x in 0..map.dimensions().x {
@@ -62,7 +58,10 @@ pub fn spawn_level(
                     let position = Vector2::new(x, y);
                     let tiles = map.get(position).unwrap();
                     for tile in tiles.iter() {
-                        commands.spawn((map_tile(tile, &tilemap_assets), GridPosition(position)));
+                        commands.spawn((
+                            map_tile(tile, &tilemap_assets),
+                            GridPosition(position.map(|x| x as u32)),
+                        ));
                     }
                 }
             }
